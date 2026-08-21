@@ -936,7 +936,25 @@ discuss:
   serverURLs:
   path: window.location.pathname
 
+#---------------------------
+# 友情链接页
+# Links Page
+#---------------------------
+links:
+  enable: false
 
+  comments:
+    enable: false
+    type: disqus
+
+
+#---------------------------
+# 分类页
+# Category Page
+#---------------------------
+category:
+  enable: false
+  
 #---------------------------
 # 归档页
 # Archive Page
