@@ -462,7 +462,7 @@ footer:
   # 页脚第一行文字的 HTML，建议保留 Fluid 的链接，用于向更多人推广本主题
   # HTML of the first line of the footer, it is recommended to keep the Fluid link to promote this theme to more people
   content: '
-    <p style="margin-bottom: .6rem;">和光同尘 . 江上风清</p>
+    <p style="margin-bottom: .6rem; font-family: SimHei, &quot;Microsoft YaHei&quot;, sans-serif;">和光同尘 . 江上风清</p>
     <p>© 2008-2026 魂器猫鱼</p>
   '
 
