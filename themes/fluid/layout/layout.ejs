@@ -19,7 +19,9 @@ var colorSchema = theme.dark_mode && theme.dark_mode.enable && theme.dark_mode.d
     <% if(is_post() || page.layout === '404') { %>
       <%- body %>
     <% } else { %>
-      <div class="container nopadding-x-md">
+      <div class="container-fluid nopadding-x">
+        <div class="row nomargin-x">
+          <div class="col-12 col-lg-8 mx-auto nopadding-x-md">
         <div id="board"
           <%- banner_img_height >= 100 && theme.banner && theme.banner.parallax ? 'style="margin-top: 0"' : '' %>>
           <% if(page.layout === 'about') { %>
@@ -27,12 +29,10 @@ var colorSchema = theme.dark_mode && theme.dark_mode.enable && theme.dark_mode.d
               <img src="<%= url_for(theme.about.avatar) %>" class="img-fluid" alt="avatar">
             </div>
           <% } %>
-          <div class="container">
-            <div class="row">
-              <div class="col-12 col-lg-8 mx-auto">
-                <%- body %>
-              </div>
-            </div>
+          <div class="layout-panel">
+            <%- body %>
+          </div>
+        </div>
           </div>
         </div>
       </div>
@@ -52,6 +52,8 @@ var colorSchema = theme.dark_mode && theme.dark_mode.enable && theme.dark_mode.d
       <div class="col-lg-7 mx-auto nopadding-x-md">
         <div class="container custom mx-auto">
           <%- theme.custom_html %>
+        </div>
+          </div>
         </div>
       </div>
     <% } %>
