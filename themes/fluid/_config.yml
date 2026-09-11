@@ -462,8 +462,8 @@ footer:
   # 页脚第一行文字的 HTML，建议保留 Fluid 的链接，用于向更多人推广本主题
   # HTML of the first line of the footer, it is recommended to keep the Fluid link to promote this theme to more people
   content: '
-    <p style="margin-bottom: .6rem; font-family: SimHei, &quot;Microsoft YaHei&quot;, sans-serif;">和光同尘 . 江上风清</p>
-    <p>© 2008-2026 魂器猫鱼</p>
+    <p style="margin-bottom: .6rem; font-family: -apple-system, BlinkMacSystemFont, &quot;Helvetica Neue&quot;, &quot;PingFang SC&quot;, &quot;Microsoft YaHei&quot;, &quot;Source Han Sans SC&quot;, &quot;Noto Sans CJK SC&quot;, &quot;WenQuanYi Micro Hei&quot;, sans-serif; color: #1565c0; font-weight: bold;">和光同尘 . 江上风清</p>
+    <p style="font-family: -apple-system, BlinkMacSystemFont, &quot;Helvetica Neue&quot;, &quot;PingFang SC&quot;, &quot;Microsoft YaHei&quot;, &quot;Source Han Sans SC&quot;, &quot;Noto Sans CJK SC&quot;, &quot;WenQuanYi Micro Hei&quot;, sans-serif;">© 2008-2026 魂器猫鱼</p>
   '
 
   # 展示网站的 PV、UV 统计数
@@ -592,7 +592,7 @@ post:
       # 格式参照 ISO-8601 日期格式化
       # ISO-8601 date format
       # See: http://momentjs.cn/docs/#/parsing/string-format/
-      format: "LL a"
+      format: "LL"
 
     # 字数统计
     # Word count
