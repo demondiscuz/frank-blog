@@ -8,3 +8,5 @@ public/
 _multiconfig.yml
 # Obsidian
 source/_posts/.obsidian/
+# Wrangler 本地状态
+.wrangler/

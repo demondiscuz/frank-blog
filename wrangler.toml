@@ -1,0 +1,9 @@
+# Cloudflare Pages Functions 配置
+# 声明 D1 数据库绑定（变量名必须与 functions 代码中的 env.VISIT_DB 一致）
+name = "frank-blog"
+compatibility_date = "2026-09-14"
+
+[[d1_databases]]
+binding = "VISIT_DB"
+database_name = "blog_visits"
+database_id = "91f8b329-1b4d-4230-8841-6f2560901ffc"

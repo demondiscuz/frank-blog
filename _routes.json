@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/css/*",
+    "/js/*",
+    "/img/*",
+    "/xml/*",
+    "/favicon.ico",
+    "/*.css",
+    "/*.js",
+    "/*.png",
+    "/*.jpg",
+    "/*.jpeg",
+    "/*.gif",
+    "/*.webp",
+    "/*.svg",
+    "/*.ico",
+    "/*.woff",
+    "/*.woff2",
+    "/*.ttf",
+    "/*.xml",
+    "/*.txt",
+    "/*.webmanifest",
+    "/local-search.xml"
+  ]
+}
