@@ -1,19 +1,17 @@
 // 访客记录中间件
 // 原理：Cloudflare 在每个请求上附带 request.cf 地理对象（国家/省/城市/经纬度，免费版可用）
 //       以及 CF-Connecting-IP 真实访客 IP；这里把页面访问异步写入 D1 数据库，不影响访问速度
+// 同时给所有页面响应加 X-Robots-Tag，禁止搜索引擎索引、存档、生成摘要
 export async function onRequest(context) {
   const { request, env, next, waitUntil } = context;
+  const url = new URL(request.url);
+  const accept = request.headers.get('accept') || '';
+  const isHtml = accept.includes('text/html');
+  const isPageGet = request.method === 'GET' && isHtml && !url.pathname.startsWith('/visits');
 
   try {
-    const url = new URL(request.url);
-    const accept = request.headers.get('accept') || '';
     // 只记录“人在浏览器里打开页面”的 GET/HTML 请求；查询页本身不记录
-    const isPage =
-      request.method === 'GET' &&
-      accept.includes('text/html') &&
-      !url.pathname.startsWith('/visits');
-
-    if (isPage && env && env.VISIT_DB) {
+    if (isPageGet && env && env.VISIT_DB) {
       const cf = request.cf || {};
       const ua = request.headers.get('user-agent') || '';
       const isBot = /bot|spider|crawler|slurp|facebookexternalhit|embedly|quora|pinterest|preview|python|curl|request/i.test(ua) ? 1 : 0;
@@ -48,5 +46,14 @@ export async function onRequest(context) {
     // 任何异常都不阻断正常访问
   }
 
-  return next();
+  const response = await next();
+
+  // 禁止一切搜索引擎收录/存档/摘要（知道网址直接访问的人完全不受影响）
+  if (isHtml) {
+    response.headers.set(
+      'X-Robots-Tag',
+      'noindex, nofollow, noarchive, nosnippet, noimageindex'
+    );
+  }
+  return response;
 }
