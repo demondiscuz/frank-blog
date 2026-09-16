@@ -11,7 +11,28 @@ var max_font = theme.tag.tagcloud.max_font || 30
 var unit = theme.tag.tagcloud.unit || 'px'
 var start_color = theme.tag.tagcloud.start_color || '#BBBBEE'
 var end_color = theme.tag.tagcloud.end_color || '#337ab7'
+
+// 词云数据：name / weight(文章数) / url(标签页链接)
+var cloud_items = site.tags.map(function (t) {
+  return [t.name, t.length, url_for(t.path)];
+});
 %>
+
+<style>
+  #wordcloud-wrap {
+    margin: 0 auto 1.5rem auto;
+    max-width: 100%;
+    text-align: center;
+  }
+  #wordcloud-wrap canvas {
+    max-width: 100%;
+    height: auto;
+  }
+</style>
+
+<div id="wordcloud-wrap">
+  <canvas id="tagcloud-canvas" width="900" height="480"></canvas>
+</div>
 
 <div class="text-center tagcloud">
   <%- tagcloud({
@@ -24,3 +45,59 @@ var end_color = theme.tag.tagcloud.end_color || '#337ab7'
     end_color
   }) %>
 </div>
+
+<script src="<%- url_for('/js/wordcloud2.js') %>"></script>
+<script>
+(function () {
+  var items = <%- JSON.stringify(cloud_items) %>;
+  if (!items || !items.length) return;
+  var canvas = document.getElementById('tagcloud-canvas');
+  if (!canvas || typeof WordCloud !== 'function') return;
+
+  // 七色均衡：词平均分配到 红橙黄绿青蓝紫，再洗牌（与预览图同一套逻辑）
+  var bands = [
+    { lo: 330, hi: 360 }, { lo: 30, hi: 60 }, { lo: 60, hi: 90 },
+    { lo: 90, hi: 150 }, { lo: 150, hi: 200 }, { lo: 200, hi: 260 }, { lo: 260, hi: 330 }
+  ];
+  var words = items.map(function (it) { return it[0]; });
+  for (var i = words.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = words[i]; words[i] = words[j]; words[j] = tmp;
+  }
+  var bandOf = {};
+  var n = words.length;
+  for (var i = 0; i < n; i++) {
+    bandOf[words[i]] = i % 7;
+  }
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function colorFn(word) {
+    var b = bands[bandOf[word] || 0];
+    var h = rand(b.lo, b.hi);
+    var s = rand(30, 48);      // 饱和度压低
+    var l = rand(55, 70);      // 明度略提
+    return 'hsl(' + h.toFixed(1) + ',' + s.toFixed(1) + '%,' + l.toFixed(1) + '%)';
+  }
+  var urlMap = {};
+  items.forEach(function (it) { urlMap[it[0]] = it[2]; });
+
+  WordCloud(canvas, {
+    list: items.map(function (it) { return [it[0], it[1]]; }),
+    gridSize: 8,
+    weightFactor: 16,
+    maxFontSize: 64,
+    minSize: 10,
+    fontFamily: "'Microsoft YaHei','PingFang SC',sans-serif",
+    fontWeight: 'normal',
+    color: colorFn,
+    rotateRatio: 0,
+    backgroundColor: 'transparent',
+    shrinkToFit: true,
+    shape: 'circle',
+    click: function (item) {
+      if (item && urlMap[item[0]]) {
+        window.location.href = urlMap[item[0]];
+      }
+    }
+  });
+})();
+</script>
