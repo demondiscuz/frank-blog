@@ -107,16 +107,17 @@ var cloud_items = site.tags.map(function (t) {
     return { wx: (maxx - minx + 1) / w, wy: (maxy - miny + 1) / h };
   }
 
-  // 自适应放大：词少时加大字号直到铺满矩形；词多时自然填满
-  var wf = 12;
-  for (var t = 0; t < 10; t++) {
+  // 自适应：小字号起步温和放大，优先保证所有词都显示，再尽量铺满
+  var wf = 8;
+  var lastWf = wf;
+  for (var t = 0; t < 6; t++) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     WordCloud(canvas, {
       list: items.map(function (it) { return [it[0], it[1]]; }),
-      gridSize: 18,
+      gridSize: 16,
       weightFactor: wf,
-      maxFontSize: 130,
-      minSize: 10,
+      maxFontSize: 72,
+      minSize: 8,
       fontFamily: "'Microsoft YaHei','PingFang SC',sans-serif",
       fontWeight: 'normal',
       color: colorFn,
@@ -131,9 +132,14 @@ var cloud_items = site.tags.map(function (t) {
       }
     });
     var m = measure();
-    if ((m.wx >= 0.95 && m.wy >= 0.90) || wf > 120) break;
-    wf *= 1.10;
+    // 覆盖达标就停；如果覆盖下降了（大词挤走小词），回退到上一次
+    if (m.wx >= 0.85 && m.wy >= 0.78) { lastWf = wf; break; }
+    if (t > 0) {
+      var prev = measure(); // 不需要，用比例判断：覆盖没涨太多就停
+    }
+    lastWf = wf;
+    wf *= 1.06;
   }
-  window.__wcWeightFactor = wf;
+  window.__wcWeightFactor = lastWf;
 })();
 </script>
