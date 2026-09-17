@@ -13,9 +13,26 @@ var start_color = theme.tag.tagcloud.start_color || '#BBBBEE'
 var end_color = theme.tag.tagcloud.end_color || '#337ab7'
 
 // 词云数据：name / weight(文章数) / url(标签页链接)
+// 按文章数降序，取前100；同频率随机打乱后截取
 var cloud_items = site.tags.map(function (t) {
   return [t.name, t.length, url_for(t.path)];
 });
+// 同频率段内随机（Fisher-Yates on equal-weight tail）
+cloud_items.sort(function (a, b) { return b[1] - a[1]; });
+var cutoff = Math.min(100, cloud_items.length);
+// 找最后一个保留项的频率值
+var tailWeight = cloud_items[cutoff - 1] ? cloud_items[cutoff - 1][1] : 0;
+// 把所有等于 tailWeight 的项收集起来随机洗牌
+var head = [], tail = [];
+for (var ci = 0; ci < cutoff; ci++) {
+  if (cloud_items[ci][1] === tailWeight) tail.push(cloud_items[ci]);
+  else head.push(cloud_items[ci]);
+}
+for (var i = tail.length - 1; i > 0; i--) {
+  var j = Math.floor(Math.random() * (i + 1));
+  var tmp = tail[i]; tail[i] = tail[j]; tail[j] = tmp;
+}
+cloud_items = head.concat(tail).slice(0, 100);
 %>
 
 <style>
@@ -107,16 +124,16 @@ var cloud_items = site.tags.map(function (t) {
     return { wx: (maxx - minx + 1) / w, wy: (maxy - miny + 1) / h };
   }
 
-  // 自适应：小字号起步温和放大，优先保证所有词都显示，再尽量铺满
-  var wf = 8;
-  var lastWf = wf;
-  for (var t = 0; t < 6; t++) {
+  // 自适应：放大字号直到墨迹覆盖容器95%×95%；覆盖下降则回退
+  var wf = 10;
+  var bestWf = wf, bestCover = 0;
+  for (var t = 0; t < 14; t++) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     WordCloud(canvas, {
       list: items.map(function (it) { return [it[0], it[1]]; }),
       gridSize: 16,
       weightFactor: wf,
-      maxFontSize: 72,
+      maxFontSize: 110,
       minSize: 8,
       fontFamily: "'Microsoft YaHei','PingFang SC',sans-serif",
       fontWeight: 'normal',
@@ -132,14 +149,13 @@ var cloud_items = site.tags.map(function (t) {
       }
     });
     var m = measure();
-    // 覆盖达标就停；如果覆盖下降了（大词挤走小词），回退到上一次
-    if (m.wx >= 0.85 && m.wy >= 0.78) { lastWf = wf; break; }
-    if (t > 0) {
-      var prev = measure(); // 不需要，用比例判断：覆盖没涨太多就停
-    }
-    lastWf = wf;
-    wf *= 1.06;
+    var cover = m.wx * m.wy;
+    if (cover > bestCover) { bestCover = cover; bestWf = wf; }
+    if (m.wx >= 0.95 && m.wy >= 0.95) { bestWf = wf; break; }
+    // 覆盖开始下降（大词挤走小词）就停止，用最好的一次
+    if (t > 0 && cover < bestCover * 0.97) break;
+    wf *= 1.12;
   }
-  window.__wcWeightFactor = lastWf;
+  window.__wcWeightFactor = bestWf;
 })();
 </script>
