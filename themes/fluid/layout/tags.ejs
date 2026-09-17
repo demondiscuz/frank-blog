@@ -124,14 +124,14 @@ cloud_items = head.concat(tail).slice(0, 100);
     return { wx: (maxx - minx + 1) / w, wy: (maxy - miny + 1) / h };
   }
 
-  // 固定适中字号，保证前100个词全部画出，不强行放大挤掉小词
-  var wf = 9;
+  // 大字号铺满画布，maxFontSize 限制住避免大词挤掉小词
+  var wf = 22;
   WordCloud(canvas, {
     list: items.map(function (it) { return [it[0], it[1]]; }),
-    gridSize: 12,
+    gridSize: 14,
     weightFactor: wf,
-    maxFontSize: 48,
-    minSize: 8,
+    maxFontSize: 64,
+    minSize: 10,
     fontFamily: "'Microsoft YaHei','PingFang SC',sans-serif",
     fontWeight: 'normal',
     color: colorFn,
