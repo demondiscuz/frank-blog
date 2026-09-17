@@ -54,6 +54,14 @@ var cloud_items = site.tags.map(function (t) {
   var canvas = document.getElementById('tagcloud-canvas');
   if (!canvas || typeof WordCloud !== 'function') return;
 
+  // 占满文本框：canvas 尺寸 = 容器宽度，高度按 16:9 比例
+  var wrap = document.getElementById('wordcloud-wrap');
+  var w = wrap ? wrap.clientWidth : 900;
+  if (w < 200) w = 900;
+  var h = Math.round(w * 0.5625);
+  canvas.width = w;
+  canvas.height = h;
+
   // 七色均衡：词平均分配到 红橙黄绿青蓝紫，再洗牌（与预览图同一套逻辑）
   var bands = [
     { lo: 330, hi: 360 }, { lo: 30, hi: 60 }, { lo: 60, hi: 90 },
@@ -80,24 +88,52 @@ var cloud_items = site.tags.map(function (t) {
   var urlMap = {};
   items.forEach(function (it) { urlMap[it[0]] = it[2]; });
 
-  WordCloud(canvas, {
-    list: items.map(function (it) { return [it[0], it[1]]; }),
-    gridSize: 8,
-    weightFactor: 16,
-    maxFontSize: 64,
-    minSize: 10,
-    fontFamily: "'Microsoft YaHei','PingFang SC',sans-serif",
-    fontWeight: 'normal',
-    color: colorFn,
-    rotateRatio: 0,
-    backgroundColor: 'transparent',
-    shrinkToFit: true,
-    shape: 'circle',
-    click: function (item) {
-      if (item && urlMap[item[0]]) {
-        window.location.href = urlMap[item[0]];
+  var ctx = canvas.getContext('2d');
+  // 测量墨迹边界占比（返回宽度/高度方向的覆盖比例）
+  function measure() {
+    var d, w = canvas.width, h = canvas.height;
+    try { d = ctx.getImageData(0, 0, w, h).data; } catch (e) { return { wx: 1, wy: 1 }; }
+    var minx = w, miny = h, maxx = 0, maxy = 0, hit = false;
+    for (var y = 0; y < h; y += 2) {
+      for (var x = 0; x < w; x += 2) {
+        if (d[(y * w + x) * 4 + 3] > 40) {
+          hit = true;
+          if (x < minx) minx = x; if (x > maxx) maxx = x;
+          if (y < miny) miny = y; if (y > maxy) maxy = y;
+        }
       }
     }
-  });
+    if (!hit) return { wx: 0, wy: 0 };
+    return { wx: (maxx - minx + 1) / w, wy: (maxy - miny + 1) / h };
+  }
+
+  // 自适应放大：词少时加大字号直到铺满矩形；词多时自然填满
+  var wf = 16;
+  for (var t = 0; t < 8; t++) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    WordCloud(canvas, {
+      list: items.map(function (it) { return [it[0], it[1]]; }),
+      gridSize: 12,
+      weightFactor: wf,
+      maxFontSize: 140,
+      minSize: 10,
+      fontFamily: "'Microsoft YaHei','PingFang SC',sans-serif",
+      fontWeight: 'normal',
+      color: colorFn,
+      rotateRatio: 0,
+      backgroundColor: 'transparent',
+      shrinkToFit: false,
+      shape: 'circle',
+      click: function (item) {
+        if (item && urlMap[item[0]]) {
+          window.location.href = urlMap[item[0]];
+        }
+      }
+    });
+    var m = measure();
+    if ((m.wx >= 0.92 && m.wy >= 0.88) || wf > 130) break;
+    wf *= 1.12;
+  }
+  window.__wcWeightFactor = wf;
 })();
 </script>
