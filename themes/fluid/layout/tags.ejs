@@ -124,38 +124,27 @@ cloud_items = head.concat(tail).slice(0, 100);
     return { wx: (maxx - minx + 1) / w, wy: (maxy - miny + 1) / h };
   }
 
-  // 自适应：放大字号直到墨迹覆盖容器95%×95%；覆盖下降则回退
-  var wf = 10;
-  var bestWf = wf, bestCover = 0;
-  for (var t = 0; t < 14; t++) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    WordCloud(canvas, {
-      list: items.map(function (it) { return [it[0], it[1]]; }),
-      gridSize: 16,
-      weightFactor: wf,
-      maxFontSize: 110,
-      minSize: 8,
-      fontFamily: "'Microsoft YaHei','PingFang SC',sans-serif",
-      fontWeight: 'normal',
-      color: colorFn,
-      rotateRatio: 0,
-      backgroundColor: 'transparent',
-      shrinkToFit: false,
-      shape: 'square',
-      click: function (item) {
-        if (item && urlMap[item[0]]) {
-          window.location.href = urlMap[item[0]];
-        }
+  // 固定适中字号，保证前100个词全部画出，不强行放大挤掉小词
+  var wf = 9;
+  WordCloud(canvas, {
+    list: items.map(function (it) { return [it[0], it[1]]; }),
+    gridSize: 12,
+    weightFactor: wf,
+    maxFontSize: 48,
+    minSize: 8,
+    fontFamily: "'Microsoft YaHei','PingFang SC',sans-serif",
+    fontWeight: 'normal',
+    color: colorFn,
+    rotateRatio: 0,
+    backgroundColor: 'transparent',
+    shrinkToFit: false,
+    shape: 'square',
+    click: function (item) {
+      if (item && urlMap[item[0]]) {
+        window.location.href = urlMap[item[0]];
       }
-    });
-    var m = measure();
-    var cover = m.wx * m.wy;
-    if (cover > bestCover) { bestCover = cover; bestWf = wf; }
-    if (m.wx >= 0.95 && m.wy >= 0.95) { bestWf = wf; break; }
-    // 覆盖开始下降（大词挤走小词）就停止，用最好的一次
-    if (t > 0 && cover < bestCover * 0.97) break;
-    wf *= 1.12;
-  }
-  window.__wcWeightFactor = bestWf;
+    }
+  });
+  window.__wcWeightFactor = wf;
 })();
 </script>
