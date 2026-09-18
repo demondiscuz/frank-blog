@@ -10,3 +10,6 @@ _multiconfig.yml
 source/_posts/.obsidian/
 # Wrangler 本地状态
 .wrangler/
+
+# 本地工作笔记
+_notes/
